@@ -1,0 +1,112 @@
+---
+title: "birdcastdata"
+format: html
+---
+
+## tibbles
+```{r}
+library(plotly)
+library(tidyverse)
+
+bird_cast_slc <- tibble(
+  date = c("04/12/2026", "04/11/2026", "04/10/2026", "04/09/2026", "04/08/2026", "04/07/2026", "04/06/2026", "04/05/2026", "04/04/2026", "04/03/2026", "04/02/2026", "04/01/2026", "03/31/2026", "03/30/2026", "03/29/2026", "03/28/2026", "03/27/2026", "03/26/2026", "03/25/2026", "03/24/2026", "03/23/2026", "03/22/2026", "03/21/2026", "03/20/2026", "03/19/2026", "03/18/2026", "03/17/2026", "03/16/2026", "03/15/2026", "03/14/2026", "03/13/2026", "03/12/2026", "03/11/2026", "03/10/2026", "03/09/2026", "03/08/2026", "03/07/2026", "03/06/2026", "03/05/2026", "03/04/2026", "03/03/2026", "03/02/2026",
+  "03/01/2026"),
+  birds = c(459900, 47400, 2600, 1465100, 1157700, 8900, 32500, 3200, 870600, 159800, 59000, 11900, 3600, 43600, 599500, 6700, 1400, 900, 103500, 19700, 1400, 1400, 9300, 1800, 1100, 4500, 600, 1800, 26600, 2100, 7300, 600, 8700, 7900, 59800, 38800, 9900, 4300, 700, 4300, 1700, 10300, 2900),
+  flight_speed = c(50, 8, 7, 42, 44, 9, 10, 34, 67, 18, 53, 8, NA, 20, 40, 9, NA, 18, 28, 14, NA, NA, 10, NA, 23, 18, NA, 27, NA, NA, 31, 12, NA, NA, 19, 18, 15, 39, NA, NA, NA, 13, NA)
+)
+bird_cast_slc <- bird_cast_slc |>
+  mutate(date = mdy(date))
+bird_cast_slc
+
+
+bird_cast_fc <- tibble(
+  date = c("04/12/2026", "04/11/2026", "04/10/2026", "04/09/2026", "04/08/2026","04/07/2026", "04/06/2026", "04/05/2026", "04/04/2026", "04/03/2026", "04/02/2026", "04/01/2026", "03/31/2026", "03/30/2026", "03/29/2026", "03/28/2026", "03/27/2026", "03/26/2026", "03/25/2026", "03/24/2026", "03/23/2026","03/22/2026", "03/21/2026","03/20/2026", "03/19/2026", "03/18/2026", "03/17/2026", "03/16/2026", "03/15/2026", "03/14/2026", "03/13/2026", "03/12/2026", "03/11/2026", "03/10/2026", "03/09/2026", "03/08/2026", "03/07/2026", "03/06/2026", "03/05/2026", "03/04/2026", "03/03/2026", "03/02/2026",
+  "03/01/2026"),
+  birds = c(1356700, 82300, 261300, 195300, 25100, 100, 10200, 100, 645900, 1008200, 261900, 143200, 775500,  227000, 744100, 4400, 0, 280100, 465300, 87900, 0, 506200, 409700, 7900, 123700, 7500, 0, 300, 32900, 19300, 54600, 3100, 342900, 537200, 414300, 30300, 951100, 9200, 15800, 37100, 10400, 0, 1100),
+  flight_speed = c(52, 24, 36, 26, 25, NA, 17, NA, 49, 38, 51, 22, 51, 49, 53, 13, NA, 49, 45, 32, NA, 30, 41, 29, 36, NA, NA, 36, 48, 24, 38, 20, 57, 42, 31, 19, 49, 22, 34, 37, 28, NA, 25))
+bird_cast_fc <- bird_cast_fc |>
+  mutate(date = mdy(date))
+bird_cast_fc
+
+
+bird_cast_mc <- tibble(
+  date = c("04/12/2026", "04/11/2026", "04/10/2026", "04/09/2026", "04/08/2026","04/07/2026", "04/06/2026", "04/05/2026", "04/04/2026", "04/03/2026", "04/02/2026", "04/01/2026", "03/31/2026", "03/30/2026", "03/29/2026", "03/28/2026", "03/27/2026", "03/26/2026", "03/25/2026", "03/24/2026", "03/23/2026","03/22/2026", "03/21/2026","03/20/2026", "03/19/2026", "03/18/2026", "03/17/2026", "03/16/2026", "03/15/2026", "03/14/2026", "03/13/2026", "03/12/2026", "03/11/2026", "03/10/2026", "03/09/2026", "03/08/2026", "03/07/2026", "03/06/2026", "03/05/2026", "03/04/2026", "03/03/2026", "03/02/2026",
+  "03/01/2026"),
+  birds = c(27100, 11400, 16800, 35000, 39500, 28000, 27500, 59500, 18900, 47200, 45000, 49700, 18200, 51900, 13600, 3700, 6900, 9800, 16000, 19300, 13500, 17000, 4600, 700, 0, 0, 0, 4500, 76200, 42000, 10400, 11200, 107000, 19200, 14400, 36900, 24900, 11800, 11000, 12700, 1600, 700, 400),
+  flight_speed = c(15, 18, 14, 23, 21, 3, 10, 15, 19, 24, 21, 20, 18, 20, 18, 7, 14, 18, 17, 11, 12, 12, 17, NA, NA, 9, 12, 19, 36, 9, 3, 8, 28, 12, 14, 18, 8, 17, 22, 18, 18, NA, NA))
+bird_cast_mc <- bird_cast_mc |>
+  mutate(date = mdy(date))
+bird_cast_mc
+```
+
+
+## st lawrence county birds by day
+```{r}
+slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_speed)) +
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
+
+ggplotly(slc, tooltips = "label")
+
+```
+
+## fairfax county birds by day
+```{r}
+fc <- ggplot(data = bird_cast_fc, aes(x = date, y = birds, label = flight_speed)) +
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+    scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(title = "BirdCast Migration Data in Fairfax County", y = "Number of Birds", x = "Date")
+
+ggplotly(fc, tooltips = "label")
+```
+
+## monroe county birds by day
+```{r}
+mc <- ggplot(data = bird_cast_mc, aes(x = date, y = birds, label = flight_speed)) +
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+    scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(title = "BirdCast Migration Data in Monroe County", y = "Number of Birds", x = "Date")
+
+ggplotly(mc, tooltips = "label")
+```
+
+
+
+## plot of all three together
+```{r}
+bird_cast_all <- bind_rows(
+  bird_cast_slc |> mutate(location = "St. Lawrence County"),
+  bird_cast_fc  |> mutate(location = "Fairfax County"),
+  bird_cast_mc  |> mutate(location = "Monroe County")
+) |>
+  arrange(date)
+
+ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  scale_color_viridis_d() +
+  labs(title = "BirdCast Migration Data", y = "Number of Birds", x = "Date", color = "Location") +
+  theme(legend.position = "bottom")
+
+## scale_y_continuous and scale_x_date sourced from claude
+## prompt: how can i make my plot look more readable?
+
+## idk if facet should be present or not
+```
+
+
+
+
