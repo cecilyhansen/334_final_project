@@ -107,6 +107,70 @@ ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
 ## idk if facet should be present or not
 ```
 
+```{r}
+library(tidyverse)
+library(lubridate)
 
+# --- Load & clean 4285590 (St. Lawrence County, NY) ---
+weather_slc <- X4285590 |>
+  select(NAME, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
+  mutate(DATE = ymd(DATE)) |>
+  group_by(DATE) |>
+  summarise(
+    prcp  = mean(PRCP, na.rm = TRUE),
+    tmax  = mean(TMAX, na.rm = TRUE),
+    tmin  = mean(TMIN, na.rm = TRUE),
+    tavg  = mean(TAVG, na.rm = TRUE),
+    snow  = mean(SNOW, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(location = "St. Lawrence County")   
 
+# --- Load & clean 4285610 (Fairfax County, VA) ---
+weather_fc <- X4285610 |>
+  select(STATION, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
+  mutate(DATE = ymd(DATE)) |>
+  group_by(DATE) |>
+  summarise(
+    prcp  = mean(PRCP, na.rm = TRUE),
+    tmax  = mean(TMAX, na.rm = TRUE),
+    tmin  = mean(TMIN, na.rm = TRUE),
+    tavg  = mean(TAVG, na.rm = TRUE),
+    snow  = mean(SNOW, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(location = "Fairfax County")     # match your BirdCast label
+
+# --- Combine both weather datasets ---
+weather_combined <- bind_rows(weather_slc, weather_fc)
+
+# --- Join with BirdCast data ---
+# bird_combined already has: date, birds, flight_speed, location
+bird_weather <- bird_cast_all |>
+  left_join(weather_combined, by = c("date" = "DATE", "location" = "location"))
+
+bird_weather
+```
+
+```{r}
+bird_weather_slc <- bird_weather |> filter(location == "St. Lawrence County") |>
+  mutate(birds = birds/10000)
+  
+library(broom)
+library(ggeffects)
+
+mod_slc <- lm(birds ~ tmax, data = bird_weather_slc) 
+mod_slc |> tidy()
+
+pred_slc <- ggpredict(mod_slc, terms = "tmax") |>
+  as.data.frame(terms_to_colnames = TRUE) |>
+  as_tibble()
+
+ggplot(data = bird_weather_slc, aes(x = tmax, y = birds)) +
+  geom_point() +
+  geom_line(data = pred_slc, aes(x = tmax, y = predicted),
+            colour = "blue", linewidth = 1.2) +
+  theme_minimal() +
+  labs(title = "Relationship between daily maximum temperature and number of migratory birds", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
+```
 
