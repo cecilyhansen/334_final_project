@@ -42,15 +42,29 @@ bird_cast_mc
 
 ## st lawrence county birds by day
 ```{r}
+slc_note <- tibble(
+  date = mdy(c("04/09/2026", "04/01/2026", "03/15/2026", "03/01/2026")),
+  note = c("Likely birds: Pine Warbler, Ruby-crowned Kinglet, American Bittern, Eastern Towhee, Hermit Thrush, Yellow-rumped Warbler",
+    "Likely birds: Eastern Phoebe, Wilson's Snipe, Sandhill Crane, Fox Sparrow, American Woodcock",
+           "Likely birds: American Tree Sparrow, Killdeer, Tundra Swan",
+           "Likely birds: Snow Bunting, Bufflehead, Snow Goose, Barrow's Goldeneye")
+)
+
+bird_cast_slc_annotated <- bird_cast_slc |>
+  left_join(slc_note, by = "date")
+
 slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_speed)) +
   geom_line(color = "darkgreen") +
   geom_point(size = 0.5, alpha = 0.7) +
+  geom_point(data = filter(bird_cast_slc_annotated, !is.na(note)),
+    aes(text = note),
+    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
   scale_y_continuous(labels = scales::comma) +
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
   theme_minimal() +
   labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
 
-ggplotly(slc, tooltips = "label")
+ggplotly(slc, tooltips = c("label", "text"))
 
 ```
 
@@ -69,15 +83,30 @@ ggplotly(fc, tooltips = "label")
 
 ## monroe county birds by day
 ```{r}
-mc <- ggplot(data = bird_cast_mc, aes(x = date, y = birds, label = flight_speed)) +
+
+mc_note <- tibble(
+  date = mdy(c("04/01/2026", "03/15/2026", "03/01/2026")),
+  note = c("Likely birds: Yellow-rumped Warbler, Prothonotary Warbler, Red-breasted Merganser, Savannah Sparrow",
+           "Likely birds: Eastern Phoebe, Yellow-bellied Sapsucker, Northern Shoveler",
+           "Likely birds: Blue-headed Vireo, Northern House Wren")
+)
+
+bird_cast_mc_annotated <- bird_cast_mc |>
+  left_join(mc_note, by = "date")
+
+mc <- ggplot(data = bird_cast_mc, aes(x = date, y = birds, label = flight_speed)) + 
   geom_line(color = "darkgreen") +
   geom_point(size = 0.5, alpha = 0.7) +
-    scale_y_continuous(labels = scales::comma) +
+  geom_point(data = filter(bird_cast_mc_annotated, !is.na(note)),
+    aes(text = note),
+    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
+  scale_y_continuous(labels = scales::comma) +
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
   theme_minimal() +
   labs(title = "BirdCast Migration Data in Monroe County", y = "Number of Birds", x = "Date")
 
-ggplotly(mc, tooltips = "label")
+ 
+ggplotly(mc, tooltips = c("label", "text"))
 ```
 
 
@@ -107,17 +136,17 @@ ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
 ## idk if facet should be present or not
 ```
 
+## adding in weather data
 ```{r}
 library(tidyverse)
 library(lubridate)
-
 library(readr)
+
 X4285590 <- read_csv("data/4285590.csv")
-
 X4285610 <- read_csv("data/4285610.csv")
-X4292861 <- read_csv("data/4292861.csv")
+X4293024<- read_csv("data/4293024.csv")
 
-# --- Load & clean 4285590 (St. Lawrence County, NY) ---
+## st lawrence county
 weather_slc <- X4285590 |>
   select(NAME, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
   mutate(DATE = ymd(DATE)) |>
@@ -132,7 +161,7 @@ weather_slc <- X4285590 |>
   ) |>
   mutate(location = "St. Lawrence County")   
 
-# --- Load & clean 4285610 (Fairfax County, VA) ---
+## fairfax county
 weather_fc <- X4285610 |>
   select(STATION, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
   mutate(DATE = ymd(DATE)) |>
@@ -147,28 +176,30 @@ weather_fc <- X4285610 |>
   ) |>
   mutate(location = "Fairfax County") 
 
-weather_mc <- X4292861 |>
+## monroe county
+weather_mc <- X4293024 |>
+  select(STATION, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
   mutate(DATE = ymd(DATE)) |>
-  group_by(DATE) |
-  summarize(
+  group_by(DATE) |>
+  summarise(
+    prcp  = mean(PRCP, na.rm = TRUE),
     tmax  = mean(TMAX, na.rm = TRUE),
     tmin  = mean(TMIN, na.rm = TRUE),
     tavg  = mean(TAVG, na.rm = TRUE),
+    snow  = mean(SNOW, na.rm = TRUE),
     .groups = "drop"
   ) |>
   mutate(location = "Monroe County")
 
-# --- Combine both weather datasets ---
-weather_combined <- bind_rows(weather_slc, weather_fc)
+weather_combined <- bind_rows(weather_slc, weather_fc, weather_mc)
 
-# --- Join with BirdCast data ---
-# bird_combined already has: date, birds, flight_speed, location
 bird_weather <- bird_cast_all |>
   left_join(weather_combined, by = c("date" = "DATE", "location" = "location"))
 
 bird_weather
 ```
 
+## linear relationships between temp and # of birds
 ```{r}
 bird_weather_slc <- bird_weather |> filter(location == "St. Lawrence County") |>
   mutate(birds = birds/10000)
@@ -211,17 +242,42 @@ ggplot(data = bird_weather_fc, aes(x = tmax, y = birds)) +
 ```
 
 ```{r}
-mod <- lm(birds ~ tmax + tmax:location, data = bird_weather)
+mod <- lm(birds ~ tmin + tmin:location, data = bird_weather)
 mod |> tidy()
 
-pred <- ggpredict(mod, terms = "tmax") |>
+pred <- ggpredict(mod, terms = c("tmin", "location")) |>
   as.data.frame(terms_to_colnames = TRUE) |>
   as_tibble()
 
-ggplot(data = bird_weather, aes(x = tmax, y = birds)) +
+ggplot(data = bird_weather, aes(x = tmin, y = birds)) +
   geom_point() +
-  geom_line(data = pred, aes(x = tmax, y = predicted), color = "blue", linewidth = 1.2) +
+  geom_line(data = pred, aes(x = tmin, y = predicted), color = "darkgreen", linewidth = 1.2) +
+    geom_ribbon(data = pred, aes(y = predicted,
+                                  ymin = conf.low,
+                                  ymax = conf.high), 
+              alpha = 0.2) +
   theme_minimal() +
-  facet_wrap(~location)
+  facet_wrap(~location) +
+  labs(title = "Relationship between daily minimum temperature and number of migratory birds", x = "Daily Minimum Temp", y = "Number of Birds")
+```
+
+```{r}
+mod_p <- lm(birds ~ prcp, data = bird_weather)
+mod_p |> tidy()
+
+pred_p <- ggpredict(mod_p, terms = "prcp") |>
+  as.data.frame(terms_to_colnames = TRUE) |>
+  as_tibble()
+
+ggplot(data = bird_weather, aes(x = prcp, y = birds)) +
+  geom_point() +
+  geom_line(data = pred_p, aes(x = prcp, y = predicted), color = "darkgreen", linewidth = 1.2) +
+    geom_ribbon(data = pred_p, aes(y = predicted,
+                                  ymin = conf.low,
+                                  ymax = conf.high), 
+              alpha = 0.2) +
+  theme_minimal() +
+  facet_wrap(~location) +
+  labs(title = "Relationship between daily precipitation and number of migratory birds", x = "Daily Precipitation", y = "Number of Birds")
 ```
 
