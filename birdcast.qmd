@@ -111,6 +111,12 @@ ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
 library(tidyverse)
 library(lubridate)
 
+library(readr)
+X4285590 <- read_csv("data/4285590.csv")
+
+X4285610 <- read_csv("data/4285610.csv")
+X4292861 <- read_csv("data/4292861.csv")
+
 # --- Load & clean 4285590 (St. Lawrence County, NY) ---
 weather_slc <- X4285590 |>
   select(NAME, DATE, PRCP, TMAX, TMIN, TAVG, SNOW) |>
@@ -139,7 +145,18 @@ weather_fc <- X4285610 |>
     snow  = mean(SNOW, na.rm = TRUE),
     .groups = "drop"
   ) |>
-  mutate(location = "Fairfax County")     # match your BirdCast label
+  mutate(location = "Fairfax County") 
+
+weather_mc <- X4292861 |>
+  mutate(DATE = ymd(DATE)) |>
+  group_by(DATE) |
+  summarize(
+    tmax  = mean(TMAX, na.rm = TRUE),
+    tmin  = mean(TMIN, na.rm = TRUE),
+    tavg  = mean(TAVG, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(location = "Monroe County")
 
 # --- Combine both weather datasets ---
 weather_combined <- bind_rows(weather_slc, weather_fc)
@@ -171,6 +188,40 @@ ggplot(data = bird_weather_slc, aes(x = tmax, y = birds)) +
   geom_line(data = pred_slc, aes(x = tmax, y = predicted),
             colour = "blue", linewidth = 1.2) +
   theme_minimal() +
-  labs(title = "Relationship between daily maximum temperature and number of migratory birds", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
+  labs(title = "Relationship between daily maximum temperature and number of migratory birds in SLC", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
+```
+
+```{r}
+bird_weather_fc <- bird_weather |> filter(location == "Fairfax County") |>
+  mutate(birds = birds/10000)
+
+mod_fc <- lm(birds ~ tmax, data = bird_weather_fc) 
+mod_fc |> tidy()
+
+pred_fc <- ggpredict(mod_slc, terms = "tmax") |>
+  as.data.frame(terms_to_colnames = TRUE) |>
+  as_tibble()
+
+ggplot(data = bird_weather_fc, aes(x = tmax, y = birds)) +
+  geom_point() +
+  geom_line(data = pred_fc, aes(x = tmax, y = predicted),
+            colour = "blue", linewidth = 1.2) +
+  theme_minimal() +
+  labs(title = "Relationship between daily maximum temperature and number of migratory birds in FC", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
+```
+
+```{r}
+mod <- lm(birds ~ tmax + tmax:location, data = bird_weather)
+mod |> tidy()
+
+pred <- ggpredict(mod, terms = "tmax") |>
+  as.data.frame(terms_to_colnames = TRUE) |>
+  as_tibble()
+
+ggplot(data = bird_weather, aes(x = tmax, y = birds)) +
+  geom_point() +
+  geom_line(data = pred, aes(x = tmax, y = predicted), color = "blue", linewidth = 1.2) +
+  theme_minimal() +
+  facet_wrap(~location)
 ```
 
