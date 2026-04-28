@@ -1,10 +1,10 @@
 ---
-title: "birdcastdata"
-format: html
+title: "BirdCast Migration - Data Visualization"
+format: revealjs
+editor: visual
 ---
 
-## tibbles
-```{r}
+```{r setup, include = FALSE}
 library(plotly)
 library(tidyverse)
 
@@ -17,7 +17,6 @@ bird_cast_slc <- tibble(
 bird_cast_slc <- bird_cast_slc |>
   mutate(date = mdy(date))
 bird_cast_slc
-
 
 bird_cast_fc <- tibble(
   date = c("04/26/2026", "04/25/2026", "04/24/2026", "04/23/2026", "04/22/2026", "04/21/2026", "04/20/2026", "04/19/2026", "04/18/2026", "04/17/2026", "04/16/2026", "04/15/2026", "04/14/2026", "04/13/2026", "04/12/2026", "04/11/2026", "04/10/2026", "04/09/2026", "04/08/2026","04/07/2026", "04/06/2026", "04/05/2026", "04/04/2026", "04/03/2026", "04/02/2026", "04/01/2026", "03/31/2026", "03/30/2026", "03/29/2026", "03/28/2026", "03/27/2026", "03/26/2026", "03/25/2026", "03/24/2026", "03/23/2026","03/22/2026", "03/21/2026","03/20/2026", "03/19/2026", "03/18/2026", "03/17/2026", "03/16/2026", "03/15/2026", "03/14/2026", "03/13/2026", "03/12/2026", "03/11/2026", "03/10/2026", "03/09/2026", "03/08/2026", "03/07/2026", "03/06/2026", "03/05/2026", "03/04/2026", "03/03/2026", "03/02/2026",
@@ -37,11 +36,7 @@ bird_cast_mc <- tibble(
 bird_cast_mc <- bird_cast_mc |>
   mutate(date = mdy(date))
 bird_cast_mc
-```
 
-
-## st lawrence county birds by day
-```{r}
 slc_note <- tibble(
   date = mdy(c("04/17/2026", "04/09/2026", "04/01/2026", "03/15/2026", "03/01/2026")),
   note = c("Likely birds: Ruby-crowned Kinglet, Brown Thrasher, Eastern Towhee, Pine Warbler, Savannah Sparrow, Blue-winged Teal", "Likely birds: Pine Warbler, Ruby-crowned Kinglet, American Bittern, Eastern Towhee, Hermit Thrush, Yellow-rumped Warbler",
@@ -53,23 +48,6 @@ slc_note <- tibble(
 bird_cast_slc_annotated <- bird_cast_slc |>
   left_join(slc_note, by = "date")
 
-slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_speed)) +
-  geom_line(color = "darkgreen") +
-  geom_point(size = 0.5, alpha = 0.7) +
-  geom_point(data = filter(bird_cast_slc_annotated, !is.na(note)),
-    aes(text = note),
-    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
-  theme_minimal() +
-  labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
-
-ggplotly(slc, tooltips = c("label", "text"))
-
-```
-
-## fairfax county birds by day
-```{r}
 fc_note <- tibble(
   date = mdy(c("04/24/2026", "04/15/2026", "04/01/2026", "03/15/2026", "03/01/2026")),
   note = c("Likely birds: Great-crested Flycatcher, Black-and-white Warbler, Solitary Sandpiper, Northern Parula, Eastern Kingbird", "Likely birds: Ruby-crowned Kinglet, Golden-crowned Kinglet, Palm Warbler, Winter Wren, Caspian Tern", "Likely birds: Palm Warbler, Lousiana Waterthrush, Fox Sparrow, Pine Siskin, Horned Grebe", "Likely birds: Northern Pintail, Horned Grebe, Redhead Duck, Hermit Thrush, Yellow-bellied Sapsucker", "Likely birds: Northern Pintail, Greater Scaup, Yellow-bellied Sapsucker, Fox Sparrow")
@@ -77,23 +55,6 @@ fc_note <- tibble(
 
 bird_cast_fc_annotated <- bird_cast_fc |>
   left_join(fc_note, by = "date")
-
-fc <- ggplot(data = bird_cast_fc, aes(x = date, y = birds, label = flight_speed)) +
-  geom_line(color = "darkgreen") +
-  geom_point(size = 0.5, alpha = 0.7) +
-  geom_point(data = filter(bird_cast_fc_annotated, !is.na(note)),
-    aes(text = note),
-    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
-    scale_y_continuous(labels = scales::comma) +
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
-  theme_minimal() +
-  labs(title = "BirdCast Migration Data in Fairfax County", y = "Number of Birds", x = "Date")
-
-ggplotly(fc, tooltips = c("label", "text"))
-```
-
-## monroe county birds by day
-```{r}
 
 mc_note <- tibble(
   date = mdy(c("04/18/2026", "04/01/2026", "03/15/2026", "03/01/2026")),
@@ -105,25 +66,7 @@ mc_note <- tibble(
 bird_cast_mc_annotated <- bird_cast_mc |>
   left_join(mc_note, by = "date")
 
-mc <- ggplot(data = bird_cast_mc, aes(x = date, y = birds, label = flight_speed)) + 
-  geom_line(color = "darkgreen") +
-  geom_point(size = 0.5, alpha = 0.7) +
-  geom_point(data = filter(bird_cast_mc_annotated, !is.na(note)),
-    aes(text = note),
-    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
-  theme_minimal() +
-  labs(title = "BirdCast Migration Data in Monroe County", y = "Number of Birds", x = "Date")
 
- 
-ggplotly(mc, tooltips = c("label", "text"))
-```
-
-
-
-## plot of all three together
-```{r}
 bird_cast_all <- bind_rows(
   bird_cast_slc |> mutate(location = "St. Lawrence County"),
   bird_cast_fc  |> mutate(location = "Fairfax County"),
@@ -131,24 +74,6 @@ bird_cast_all <- bind_rows(
 ) |>
   arrange(date)
 
-ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 1.5, alpha = 0.7) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
-  theme_minimal() +
-  scale_color_viridis_d() +
-  labs(title = "BirdCast Migration Data", y = "Number of Birds", x = "Date", color = "Location") +
-  theme(legend.position = "bottom")
-
-## scale_y_continuous and scale_x_date sourced from claude
-## prompt: how can i make my plot look more readable?
-
-## idk if facet should be present or not
-```
-
-## adding in weather data
-```{r}
 library(tidyverse)
 library(lubridate)
 library(readr)
@@ -208,51 +133,9 @@ bird_weather <- bird_cast_all |>
   left_join(weather_combined, by = c("date" = "DATE", "location" = "location"))
 
 bird_weather
-```
 
-## linear relationships between temp and # of birds
-```{r}
-bird_weather_slc <- bird_weather |> filter(location == "St. Lawrence County") |>
-  mutate(birds = birds/10000)
-  
 library(broom)
 library(ggeffects)
-
-mod_slc <- lm(birds ~ tmax, data = bird_weather_slc) 
-mod_slc |> tidy()
-
-pred_slc <- ggpredict(mod_slc, terms = "tmax") |>
-  as.data.frame(terms_to_colnames = TRUE) |>
-  as_tibble()
-
-ggplot(data = bird_weather_slc, aes(x = tmax, y = birds)) +
-  geom_point() +
-  geom_line(data = pred_slc, aes(x = tmax, y = predicted),
-            colour = "blue", linewidth = 1.2) +
-  theme_minimal() +
-  labs(title = "Relationship between daily maximum temperature and number of migratory birds in SLC", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
-```
-
-```{r}
-bird_weather_fc <- bird_weather |> filter(location == "Fairfax County") |>
-  mutate(birds = birds/10000)
-
-mod_fc <- lm(birds ~ tmax, data = bird_weather_fc) 
-mod_fc |> tidy()
-
-pred_fc <- ggpredict(mod_slc, terms = "tmax") |>
-  as.data.frame(terms_to_colnames = TRUE) |>
-  as_tibble()
-
-ggplot(data = bird_weather_fc, aes(x = tmax, y = birds)) +
-  geom_point() +
-  geom_line(data = pred_fc, aes(x = tmax, y = predicted),
-            colour = "blue", linewidth = 1.2) +
-  theme_minimal() +
-  labs(title = "Relationship between daily maximum temperature and number of migratory birds in FC", x = "Daily Max Temp", y = "Number of Birds (in tens of thousands)")
-```
-
-```{r}
 mod <- lm(birds ~ tmin + tmin:location, data = bird_weather)
 mod |> tidy()
 
@@ -260,6 +143,99 @@ pred <- ggpredict(mod, terms = c("tmin", "location")) |>
   as.data.frame(terms_to_colnames = TRUE) |>
   as_tibble()
 
+## put all data loading and cleaning here before slideshow
+
+## add theme argument
+## theme_minimal(base_size = 18)
+```
+
+
+## Data Introduction
+
+BirdCast is a subset of the Cornell Lab of Ornithology, along with other websites and apps you may have already heard of like Merlin or eBird. BirdCast uses Doppler weather radar to detect the number of migrating birds during the migration season to support bird conservation and expand knowledge of migratory bird movement. 
+
+- Active from March 1 to June 15 and August 1 to November 15; I am specifically looking at March 1, 2026 to the present.
+- I scraped data on number of birds, flight speed, and species.
+- I also scraped data from NOAA to compare bird migration to weather variables. 
+
+## Question(s) of Interest
+
+- What does nightly bird migration look like in three different counties across the East Coast?
+- How do weather variables like precipitation and temperature impact bird migration?
+
+## Visualization 1
+
+```{r}
+slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_speed)) +
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+  geom_point(data = filter(bird_cast_slc_annotated, !is.na(note)),
+    aes(text = note),
+    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal(base_size = 15) +
+  labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
+
+ggplotly(slc, tooltips = c("label", "text"))
+```
+
+
+## Visualization 2
+
+```{r}
+fc <- ggplot(data = bird_cast_fc, aes(x = date, y = birds, label = flight_speed)) +
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+  geom_point(data = filter(bird_cast_fc_annotated, !is.na(note)),
+    aes(text = note),
+    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
+    scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(title = "BirdCast Migration Data in Fairfax County", y = "Number of Birds", x = "Date")
+
+ggplotly(fc, tooltips = c("label", "text"))
+```
+
+
+## Visualization 3
+
+```{r}
+mc <- ggplot(data = bird_cast_mc, aes(x = date, y = birds, label = flight_speed)) + 
+  geom_line(color = "darkgreen") +
+  geom_point(size = 0.5, alpha = 0.7) +
+  geom_point(data = filter(bird_cast_mc_annotated, !is.na(note)),
+    aes(text = note),
+    size = 3, shape = 23, color = "darkgreen", fill = "lightgreen", stroke = 1.2) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  labs(title = "BirdCast Migration Data in Monroe County", y = "Number of Birds", x = "Date")
+
+ 
+ggplotly(mc, tooltips = c("label", "text"))
+```
+
+
+## Visualization 4 - Putting it all together
+
+```{r}
+ggplot(data = bird_cast_all, aes(x = date, y = birds, color = location)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
+  theme_minimal() +
+  scale_color_viridis_d() +
+  labs(title = "BirdCast Migration Data", y = "Number of Birds", x = "Date", color = "Location") +
+  theme(legend.position = "bottom")
+```
+
+
+## Visualization 5
+
+```{r}
 ggplot(data = bird_weather, aes(x = tmin, y = birds)) +
   geom_point() +
   geom_line(data = pred, aes(x = tmin, y = predicted), color = "darkgreen", linewidth = 1.2) +
@@ -272,23 +248,4 @@ ggplot(data = bird_weather, aes(x = tmin, y = birds)) +
   labs(title = "Relationship between daily minimum temperature and number of migratory birds", x = "Daily Minimum Temp", y = "Number of Birds")
 ```
 
-```{r}
-mod_p <- lm(birds ~ prcp, data = bird_weather) 
-mod_p |> tidy()
-
-pred_p <- ggpredict(mod_p, terms = "prcp") |>
-  as.data.frame(terms_to_colnames = TRUE) |>
-  as_tibble()
-
-ggplot(data = bird_weather, aes(x = prcp, y = birds)) +
-  geom_point() +
-  geom_line(data = pred_p, aes(x = prcp, y = predicted), color = "darkgreen", linewidth = 1.2) +
-    geom_ribbon(data = pred_p, aes(y = predicted,
-                                  ymin = conf.low,
-                                  ymax = conf.high), 
-              alpha = 0.2) +
-  theme_minimal() +
-  facet_wrap(~location) +
-  labs(title = "Relationship between daily precipitation and number of migratory birds", x = "Daily Precipitation", y = "Number of Birds")
-```
 
