@@ -26,18 +26,23 @@ bird migration to weather variables.
 
 ### Questions
 
-My questions of interest are: - What does nightly bird migration look
-like in three different counties across the East Coast? - How do weather
-variables like precipitation and temperature impact bird migration?
+My questions of interest are:
+
+- What does nightly bird migration look like in three different counties
+  across the East Coast?
+
+- How do weather variables like precipitation and temperature impact
+  bird migration?
 
 ### Exploring Interactivity
 
 I used plotly to make interactive graphs of nightly bird migration in
-three different counties. Pictured below is my plotly of St. Lawrence
-County’s (NY) nightly bird migration. SLC is a hotspot for bird
-migration, with some nights having over 4 million migrants! The plotly
-allows the user to explore the exact number of birds flying on a given
-day as well as flight speed and likely species of birds passing through.
+three different counties. Pictured below is a sample of St. Lawrence
+County’s (NY) nightly bird migration (plotly is not supported in
+README). SLC is a hotspot for bird migration, with some nights having
+over 4 million migrants! The plotly allows the user to explore the exact
+number of birds flying on a given day as well as flight speed and likely
+species of birds passing through.
 
 ``` r
 slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_speed)) +
@@ -50,12 +55,7 @@ slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_spee
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
   theme_minimal(base_size = 15) +
   labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
-```
 
-    Warning in geom_point(data = filter(bird_cast_slc_annotated, !is.na(note)), :
-    Ignoring unknown aesthetics: text
-
-``` r
 slc
 ```
 
@@ -107,14 +107,5 @@ ggplot(data = bird_weather, aes(x = tmin, y = birds)) +
   facet_wrap(~location) +
   labs(title = "Relationship between daily minimum temperature and number of migratory birds", x = "Daily Minimum Temp", y = "Number of Birds")
 ```
-
-    Warning: Removed 47 rows containing missing values or values outside the scale range
-    (`geom_point()`).
-
-    Warning: Removed 1 row containing missing values or values outside the scale range
-    (`geom_line()`).
-
-    Warning: Removed 12 rows containing missing values or values outside the scale range
-    (`geom_ribbon()`).
 
 ![](README_files/figure-commonmark/unnamed-chunk-4-1.png)
