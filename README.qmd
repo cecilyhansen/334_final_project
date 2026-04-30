@@ -3,7 +3,10 @@ title: "BirdCast Migration Data for Spring 2026"
 format: gfm
 ---
 
-```{r setup, echo = FALSE}
+```{r}
+#| warning: false
+#| echo: false
+#| output: false
 library(plotly)
 library(tidyverse)
 
@@ -186,7 +189,7 @@ slc <- ggplot(data = bird_cast_slc, aes(x = date, y = birds, label = flight_spee
   theme_minimal(base_size = 15) +
   labs(title = "BirdCast Migration Data in St. Lawrence County", y = "Number of Birds", x = "Date")
 
-ggplotly(slc, tooltips = c("label", "text"))
+slc
 ```
 
 ## Comparing Counties
